@@ -1,5 +1,7 @@
 package telran.b7a;
 
+import java.time.LocalDate;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -30,6 +32,7 @@ public class ForumServiceSpringSecurityApplication implements CommandLineRunner{
 			userAccount.addRole("USER".toUpperCase());
 			userAccount.addRole("MODERATOR".toUpperCase());
 			userAccount.addRole("ADMINISTRATOR".toUpperCase());
+			userAccount.setPasswordExpDate(LocalDate.now().plusYears(30));
 			repository.save(userAccount);
 		}
 		

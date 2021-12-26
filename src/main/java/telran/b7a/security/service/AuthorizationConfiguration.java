@@ -1,5 +1,6 @@
 package telran.b7a.security.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,6 +14,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class AuthorizationConfiguration extends WebSecurityConfigurerAdapter {
 	
+	@Autowired
+	ExpiredPasswordFilter expiredPasswordFilter;
+	
 	@Override
 	public void configure(WebSecurity web) {
 		web.ignoring().antMatchers(HttpMethod.POST, "/account/register/**");
@@ -24,9 +28,14 @@ public class AuthorizationConfiguration extends WebSecurityConfigurerAdapter {
 		http.csrf().disable();
 		http.sessionManagement()
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+//		http.addFilterAfter(expiredPasswordFilter, BasicAuthenticationFilter.class);
 		http.authorizeRequests()
 			.antMatchers("/forum/posts/**")
 				.permitAll()
+			.antMatchers(HttpMethod.PUT, "/account/password/**")
+				.authenticated()
+			.antMatchers("/account/**","/forum/**")
+				.access("@customSecurity.checkPasswordExpired(authentication)")
 			.antMatchers("/account/user/{login}/role/{role}/**")
 				.hasRole("ADMINISTRATOR")
 			.antMatchers(HttpMethod.PUT, "/account/user/{login}/**")
